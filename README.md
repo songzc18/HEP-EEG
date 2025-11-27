@@ -63,22 +63,23 @@ For full function descriptions, see the API documentation (`API.md`).
 ```
 HEP-EEG/
 │
-├─ modules/
-│   ├─ hep.py               # main implementation
-│   └─ modwt.py             # MODWT implementation
+├─ data/
+│   ├─ parameter/
+│   │   ├─ antNeuro63.loc   # channels location
+│   │   └─ trigger.csv      # trigger id
+│   │ 
+│   └─ raw/                 # raw XDF/EEG data
 │
 ├─ examples/
 │   ├─ preprocessing.ipynb
 │   └─ plotting.ipynb
 │
-├─ data/
-│   ├─ parameter
-│   │   ├─ antNeuro63.loc   # channels location
-│   │   └─ trigger.csv      # trigger id
-│   │ 
-│   └─ raw                  # raw XDF/EEG data
+├─ hep_eeg/
+│   ├─ hep.py               # main implementation
+│   └─ modwt.py             # MODWT implementation
 │
 ├─ README.md
+├─ API.md
 └─ requirements.txt
 ```
 
@@ -94,4 +95,5 @@ project by GitHub user **pistonly**:
 The code was adapted for integration into the HEP-EEG toolbox.
 
 ---
+
 

@@ -10,7 +10,7 @@ The toolbox provides simple interfaces for:
 - Labeling epochs based on trigger intervals  
 - Converting data into MNE objects  
 - ICA and automatic artifact rejection  
-- Basic plotting utilities (experimental)
+- Basic plotting utilities (experimental， now used MNE method)
 
 This package aims to offer a clean and minimal alternative to large EEG frameworks
 while remaining fully compatible with **MNE-Python**.
@@ -95,6 +95,7 @@ project by GitHub user **pistonly**:
 The code was adapted for integration into the HEP-EEG toolbox.
 
 ---
+
 
 
 

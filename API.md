@@ -567,5 +567,7 @@ Save the `EvokedData` object using `pickle`.
 
 ## 5. Plotting
 > **Note**  
-> The plotting utilities will be expanded in future
+> The plotting utilities will be expanded in future.
+> Please transform to MNE object and use MNE method.
 ---
+

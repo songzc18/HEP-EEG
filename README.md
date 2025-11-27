@@ -15,6 +15,8 @@ The toolbox provides simple interfaces for:
 This package aims to offer a clean and minimal alternative to large EEG frameworks
 while remaining fully compatible with **MNE-Python**.
 
+For full function descriptions, see the API documentation (`API.md`).
+
 ---
 
 ## Installation
@@ -53,8 +55,6 @@ Complete usage examples are provided in the `examples/` folder.
 
 - **examples/plotting.ipynb**  
   Select labels and plot HEP/channel-level results.
-
-For full function descriptions, see the API documentation (`API.md`).
 
 ---
 
@@ -95,5 +95,6 @@ project by GitHub user **pistonly**:
 The code was adapted for integration into the HEP-EEG toolbox.
 
 ---
+
 
 

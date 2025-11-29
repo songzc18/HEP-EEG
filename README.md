@@ -95,6 +95,15 @@ project by GitHub user **pistonly**:
 The code was adapted for integration into the HEP-EEG toolbox.
 
 ---
+## License
+
+This project was developed by **Zichen Song** at the Laboratory of Cognitive Neuroscience (LNCO), EPFL  
+https://www.epfl.ch/labs/lnco/
+
+Licensed under **CC BY-NC-SA 4.0**  
+For details, see: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+---
 
 
 

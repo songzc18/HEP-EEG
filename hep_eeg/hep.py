@@ -1,3 +1,34 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Module Name: hep.py
+
+Description:
+    Utilities for loading XDF files, extracting triggers, and preprocessing EEG data
+    for the LNCO/EPFL EEG analysis pipeline.
+
+Author: Zichen Song
+Affiliation: Laboratory of Cognitive Neuroscience (LNCO), EPFL
+Created: 2025-11-28
+
+License:
+    This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 
+    International License. To view a copy of this license, visit 
+    https://creativecommons.org/licenses/by-nc-sa/4.0/
+    
+    You are free to:
+        - Share: copy and redistribute the material in any medium or format
+        - Adapt: remix, transform, and build upon the material
+    
+    Under the following terms:
+        - Attribution: You must give appropriate credit, provide a link to the license, 
+          and indicate if changes were made.
+        - NonCommercial: You may not use the material for commercial purposes.
+        - ShareAlike: If you remix, transform, or build upon the material, you must 
+          distribute your contributions under the same license as the original.
+"""
+
+
 import pyxdf,re,pickle,mne,os,warnings,csv
 import numpy as np
 from dataclasses import dataclass
@@ -515,4 +546,5 @@ def plot_chs(ax,epochs_list,ch_list=None,class_list=[None],stats=None):
         results = results[:,:,ch_idx].mean(2)
     for ii in range(len(class_list)):
         ax.plot(times,results[ii].mean(0),label=f"{class_list[ii]}")
+
     return ax

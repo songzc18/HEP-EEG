@@ -33,7 +33,7 @@ import pyxdf,re,pickle,mne,os,warnings,csv
 import numpy as np
 from dataclasses import dataclass
 from scipy import signal
-from modules.modwt import modwt, imodwt
+from hep_eeg.modwt import modwt, imodwt
 from scipy.signal import find_peaks
 from typing import Optional, List, Tuple, Dict
 
@@ -548,3 +548,4 @@ def plot_chs(ax,epochs_list,ch_list=None,class_list=[None],stats=None):
         ax.plot(times,results[ii].mean(0),label=f"{class_list[ii]}")
 
     return ax
+

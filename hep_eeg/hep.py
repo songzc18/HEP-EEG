@@ -43,7 +43,13 @@ def get_montage(montage):
     else:
         montage_obj = mne.channels.make_standard_montage(montage)
     return montage_obj
-
+# 
+def merge_obj(obj_list):
+    merged = obj_list[0]
+    for r in obj_list[1:]:
+        merged = merged.merge(r)
+    return merged
+# Bandpass FIR filter
 def bandpass_fir(x, fs, lo=None, hi=None, numtaps=None):
     if lo is None and hi is None:
         return x.copy()
@@ -64,12 +70,18 @@ def load_xdf_to_raw(xdf_path: str,
     rename_dict: Optional[Dict[str, str]] = None,
     ref_names: Tuple[str, ...] = ("M1", "M2")) -> "RawData":
     # 1. Load XDF file
-    streams, header = pyxdf.load_xdf(xdf_path)
+    streams, header = pyxdf.load_xdf(xdf_path)#, synchronize_clocks=False)
+    for s in streams:
+        if "type" in s["info"] and len(s["info"]["type"]) > 0:
+            if s["info"]["type"][0].upper() == "EEG":
+                eeg_stream = s
+            if s["info"]["type"][0] == "Tags":
+                trigger_stream = s
     # 2. Extract stream
-    sfreqs = 512  # or: float(streams[0]['info']['effective_srate'])
-    data = streams[0]["time_series"].T
-    times = streams[0]["time_stamps"]
-    ch_info = streams[0]["info"]["desc"][0]["channels"][0]["channel"]
+    sfreqs = 512  # or: float(eeg_stream['info']['effective_srate'])
+    data = eeg_stream["time_series"].T
+    times = eeg_stream["time_stamps"]
+    ch_info = eeg_stream["info"]["desc"][0]["channels"][0]["channel"]
     ch_names = np.array([c["label"][0] for c in ch_info])
     # 3. Separate channels
     eog_data = data[np.isin(ch_names, ["EOG"])][0]
@@ -84,7 +96,11 @@ def load_xdf_to_raw(xdf_path: str,
         ch_names = [rename_dict.get(ch, ch) for ch in ch_names]
     # 5. Extract events from trigger
     idx = np.nonzero(trigger)[0]
-    vals = trigger[idx]
+    if len(idx) > 0:
+        vals = trigger[idx]
+    else:
+        vals = trigger_stream["time_series"].flatten()
+        idx = [np.argmin(np.abs(times - t)) for t in trigger_stream["time_stamps"]]
     events = np.vstack((idx, vals)).T.astype(int)
 
     # 6. Create RawData instance
@@ -96,6 +112,11 @@ def load(filepath):
     with open(filepath, "rb") as f:
         obj = pickle.load(f)
     return obj
+# Save File
+def save(data, filepath: str):
+    filepath = str(filepath)
+    with open(filepath, "wb") as f:
+        pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 # Load Triggers from CSV
 def get_triggers_id(csv_path: str) -> List[List]:
     triggers_id = []
@@ -148,6 +169,32 @@ class RawData:
             events=None if self.events is None else self.events.copy(),
             sfreq=self.sfreq,ch_names=list(self.ch_names),
         )
+    
+    def merge(self,other) -> "RawData":
+        merged = RawData()
+        fields = ["eeg", "eog", "ecg", "resp", "ref", "trigger", "times"]
+        for f in fields:
+            a = getattr(self, f)
+            b = getattr(other, f)
+            if a is None:
+                setattr(merged, f, b)
+            elif b is None:
+                setattr(merged, f, a)
+            else:
+                setattr(merged, f, np.concatenate([a, b], axis=-1))
+        # Merge events
+        if self.events is None:
+            merged.events = other.events
+        elif other.events is None:
+            merged.events = self.events
+        else:
+            offset = self.times.shape[-1]   # length of self in samples
+            ev2 = other.events.copy()
+            ev2[:, 0] += offset             # adjust sample indices
+            merged.events = np.vstack([self.events, ev2])
+        merged.ch_names = self.ch_names
+        merged.sfreq = self.sfreq
+        return merged
     # Remove DC offset
     def remove_ecg_dc(self) -> "RawData":
         out = self.copy()
@@ -436,15 +483,14 @@ class EpochsData:
             setattr(out, key, arr)
         return out
     #Average Epochs
-    def average(self) -> "EvokedData":
+    def average(self,comment = None) -> "EvokedData":
         return EvokedData(
             eeg=None if self.eeg is None else self.eeg.mean(axis=0),
             eog=None if self.eog is None else self.eog.mean(axis=0),
             ecg=None if self.ecg is None else self.ecg.mean(axis=0),
             resp=None if self.resp is None else self.resp.mean(axis=0),
             ref=None if self.ref is None else self.ref.mean(axis=0),
-            labels=self.labels,
-            events=self.labels,
+            comment=comment,
             sfreq=self.sfreq,
             ch_names=self.ch_names,
             tmin=self.tmin,
@@ -504,8 +550,7 @@ class EvokedData:
     ecg: Optional[np.ndarray] = None
     resp: Optional[np.ndarray] = None
     ref: Optional[np.ndarray] = None
-    labels: Optional[np.ndarray] = None      # label
-    events: Optional[np.ndarray] = None
+    comment : Optional[str] = None
     sfreq: Optional[float] = None
     ch_names: Optional[List[str]] = None
     tmin: Optional[float] = None
@@ -548,4 +593,3 @@ def plot_chs(ax,epochs_list,ch_list=None,class_list=[None],stats=None):
         ax.plot(times,results[ii].mean(0),label=f"{class_list[ii]}")
 
     return ax
-
